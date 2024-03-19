@@ -1,6 +1,11 @@
+
+#Loading required packages
 library(dplyr)
+
+
 #Downloading dataset
 filename <- "Coursera_DS3_Final.zip"
+
 
 # Checking if archieve already exists.
 if (!file.exists(filename)){
@@ -8,10 +13,12 @@ if (!file.exists(filename)){
   download.file(fileURL, filename, method="curl")
 }  
 
+
 # Checking if folder exists
 if (!file.exists("UCI HAR Dataset")) { 
   unzip(filename) 
 }
+
 
 #Assigning all data frames
 features <- read.table("UCI HAR Dataset/features.txt", col.names = c("n","functions"))
@@ -23,17 +30,21 @@ subject_train <- read.table("UCI HAR Dataset/train/subject_train.txt", col.names
 x_train <- read.table("UCI HAR Dataset/train/X_train.txt", col.names = features$functions)
 y_train <- read.table("UCI HAR Dataset/train/y_train.txt", col.names = "code")
 
+
 #Step 1: Merges the training and the test sets to create one data set.
 X <- rbind(x_train, x_test)
 Y <- rbind(y_train, y_test)
 Subject <- rbind(subject_train, subject_test)
 Merged_Data <- cbind(Subject, Y, X)
 
+
 #Step 2: Extracts only the measurements on the mean and standard deviation for each measurement.
 TidyData <- Merged_Data %>% select(subject, code, contains("mean"), contains("std"))
 
+
 #Step 3: Uses descriptive activity names to name the activities in the data set.
 TidyData$code <- activities[TidyData$code, 2]
+
 
 #Step 4: Appropriately labels the data set with descriptive variable names.
 names(TidyData)[2] = "activity"
@@ -50,15 +61,18 @@ names(TidyData)<-gsub("-freq()", "Frequency", names(TidyData), ignore.case = TRU
 names(TidyData)<-gsub("angle", "Angle", names(TidyData))
 names(TidyData)<-gsub("gravity", "Gravity", names(TidyData))
 
+
 #Step 5: From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
 FinalData <- TidyData %>%
   group_by(subject, activity) %>%
   summarise_all(funs(mean))
 write.table(FinalData, "FinalData.txt", row.name=FALSE)
 
+
 #Final Check Stage
 #Checking variable names
 str(FinalData)
+
 
 #Take a look at final data
 FinalData
